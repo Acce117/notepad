@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Lanzador de la aplicación Notas.
+# Resuelve la ubicación real del script (aunque se invoque a través de un
+# enlace simbólico como ~/.local/bin/note) para localizar el proyecto.
+set -euo pipefail
+SCRIPT="$(readlink -f "${BASH_SOURCE[0]}")"
+DIR="$(cd "$(dirname "$SCRIPT")/.." && pwd)"
+exec python3 "$DIR/app/main.py" "$@"

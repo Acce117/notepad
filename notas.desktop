@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Notas
+Comment=Notas rápidas con edición estilo Vim
+Exec=@PROJECT_DIR@/bin/note
+Terminal=false
+Categories=Utility;TextEditor;
+Icon=accessories-text-editor
+StartupNotify=true
+StartupWMClass=Notas

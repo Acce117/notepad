@@ -1,0 +1,25 @@
+/* Hoja de estilos de la aplicación Notas. */
+
+/* Bordes redondeados en la ventana principal y en los diálogos (modales). */
+.app-window,
+window.dialog {
+    border-radius: 16px;
+}
+
+/* Editor: fuente monoespaciada y tamaño cómodo para escribir. */
+#vim-editor {
+    font-family: monospace;
+    font-size: 15px;
+    padding: 8px;
+}
+
+/* Barra de estado inferior: tenue para no robar protagonismo. */
+.statusbar {
+    font-size: 0.9em;
+    min-height: 1.6em;
+}
+
+/* Filas de la lista de notas. */
+listbox row {
+    padding: 0;
+}
