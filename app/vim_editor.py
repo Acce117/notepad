@@ -138,4 +138,4 @@ class VimEditor(Gtk.TextView):
         """Mantiene el cursor visible (con un pequeño margen)."""
         buf = self.get_buffer()
         mark = buf.get_insert()
-        self.scroll_to_mark(mark, 0.05, True, 0.0, 0.0)
+        self.scroll_to_mark(mark, 0.05, False, 0.0, 0.0)

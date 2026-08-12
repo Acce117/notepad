@@ -1225,17 +1225,16 @@ class VimEngine:
 
     def _insert_backspace(self):
         row, col = self.cursor
+        if col == 0:
+            # Al inicio de una línea, Backspace no hace nada (no une con la
+            # línea anterior).
+            return
         if not self._insert_pushed:
             self._push_undo()
             self._insert_pushed = True
-        if col > 0:
-            self._delete_range(self._to_off((row, col - 1)), self._to_off((row, col)))
-            self.cursor = (row, col - 1)
-        elif row > 0:
-            prev_len = len(self.lines[row - 1])
-            self.lines[row - 1] = self.lines[row - 1] + self.lines[row]
-            del self.lines[row]
-            self.cursor = (row - 1, prev_len)
+        line = self.lines[row]
+        self.lines[row] = line[:col - 1] + line[col:]
+        self.cursor = (row, col - 1)
         self._changed()
 
     def _insert_delete_fwd(self):
@@ -1248,19 +1247,19 @@ class VimEngine:
         self._changed()
 
     def _insert_delete_word_back(self):
-        if not self._insert_pushed:
-            self._push_undo()
-            self._insert_pushed = True
         row, col = self.cursor
         line = self.lines[row]
         if col == 0 and row > 0:
             self._insert_backspace()
             return
+        if not self._insert_pushed:
+            self._push_undo()
+            self._insert_pushed = True
         start = _skip_b_bwd(line, col)
         start = _skip_nb_bwd(line, start)
         if start == col:
             return
-        self._delete_range(self._to_off((row, start)), self._to_off((row, col)))
+        self.lines[row] = line[:start] + line[col:]
         self.cursor = (row, start)
         self._changed()
 

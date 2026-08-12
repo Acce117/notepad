@@ -464,8 +464,50 @@ class EngineTestCase(unittest.TestCase):
         self.key("A")
         self.engine.handle_key("Return", "")
         self.engine.handle_key("BackSpace", "")
-        self.assertEqual(self.lines, ["hola"])
-        self.assertEqual(self.cursor, (0, 4))
+        self.assertEqual(self.lines, ["hola", ""])
+        self.assertEqual(self.cursor, (1, 0))
+
+    def test_backspace_at_line_start_noop(self):
+        self.set_text("hola\nmundo")
+        self.engine.cursor = (1, 0)
+        self.key("i")
+        self.engine.handle_key("BackSpace", "")
+        self.assertEqual(self.lines, ["hola", "mundo"])
+        self.assertEqual(self.cursor, (1, 0))
+
+    def test_ctrlw_at_line_start_noop(self):
+        self.set_text("hola\nmundo")
+        self.engine.cursor = (1, 0)
+        self.key("i")
+        self.engine.handle_key("w", "", {"ctrl"})
+        self.assertEqual(self.lines, ["hola", "mundo"])
+        self.assertEqual(self.cursor, (1, 0))
+
+    def test_backspace_empties_last_line_stays(self):
+        self.set_text("hola\nmundo")
+        self.engine.cursor = (1, 5)
+        self.key("i")
+        for _ in range(5):
+            self.engine.handle_key("BackSpace", "")
+        self.assertEqual(self.lines, ["hola", ""])
+        self.assertEqual(self.cursor, (1, 0))
+
+    def test_backspace_empties_last_line_then_noop(self):
+        self.set_text("hola\nmundo")
+        self.engine.cursor = (1, 5)
+        self.key("i")
+        for _ in range(6):
+            self.engine.handle_key("BackSpace", "")
+        self.assertEqual(self.lines, ["hola", ""])
+        self.assertEqual(self.cursor, (1, 0))
+
+    def test_ctrlw_empties_last_line_stays(self):
+        self.set_text("hola\nmundo")
+        self.engine.cursor = (1, 5)
+        self.key("i")
+        self.engine.handle_key("w", "", {"ctrl"})
+        self.assertEqual(self.lines, ["hola", ""])
+        self.assertEqual(self.cursor, (1, 0))
 
 
 if __name__ == "__main__":
