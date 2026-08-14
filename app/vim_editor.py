@@ -24,7 +24,10 @@ class VimEditor(Gtk.TextView):
     def __init__(self, engine):
         super().__init__()
         self.engine = engine
-        self.set_editable(True)
+        # La vista solo *renderiza* el estado del motor; el texto lo edita
+        # siempre el motor. Evitamos que GTK/el IM escriban en el buffer a
+        # espaldas del motor (rompería el texto compuesto con teclas muertas).
+        self.set_editable(False)
         self.set_hexpand(True)
         self.set_vexpand(True)
         self.set_monospace(True)
@@ -41,6 +44,17 @@ class VimEditor(Gtk.TextView):
         controller = Gtk.EventControllerKey.new()
         controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         controller.connect("key-pressed", self._on_key_pressed)
+
+        # Método de entrada (IM): se consulta ANTES de emitir `key-pressed`,
+        # así las teclas muertas (´, ~, ¨, ^, ...) y Compose se componen aquí
+        # y llegan al motor ya formadas a través de la señal `commit`
+        # (p. ej. ´ + a -> commit "á"). El motor nunca ve la tecla muerta
+        # suelta ni el carácter sin componer.
+        self._im_context = Gtk.IMContextSimple.new()
+        self._im_context.set_client_widget(self)
+        self._im_context.connect("commit", self._on_im_commit)
+        controller.set_im_context(self._im_context)
+
         self.add_controller(controller)
 
         # Clic del ratón: coloca el cursor en modo normal.
@@ -71,6 +85,16 @@ class VimEditor(Gtk.TextView):
         # True = reclamamos el evento: GTK no aplica su comportamiento por
         # defecto (no inserta el carácter en el buffer).
         return True
+
+    def _on_im_commit(self, _im_context, text):
+        """Texto compuesto por el método de entrada (p. ej. "á" tras ´+a).
+
+        Se entrega al motor como texto ya compuesto. En los modos insertar,
+        reemplazar y en los prompts (/, :) se inserta o añade correctamente;
+        en modo normal se ignora (sin efecto)."""
+        if not text:
+            return
+        self.engine.handle_key("", text, frozenset())
 
     # ------------------------------------------------------------------ #
     # Ratón                                                              #

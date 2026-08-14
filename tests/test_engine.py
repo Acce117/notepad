@@ -510,5 +510,58 @@ class EngineTestCase(unittest.TestCase):
         self.assertEqual(self.cursor, (1, 0))
 
 
+    # Entrada del método de entrada (commit del IM) ----------------------
+    # La vista entrega el texto compuesto (´+a -> "á") al motor con
+    # handle_key("", texto). Simula la señal "commit" de Gtk.IMContext.
+
+    def test_im_commit_insert(self):
+        self.set_text("")
+        self.key("i")
+        self.engine.handle_key("", "á")
+        self.engine.handle_key("", "ñ")
+        self.key("Escape")
+        self.assertEqual(self.engine.text, "áñ")
+        self.assertEqual(self.cursor, (0, 2))
+
+    def test_im_commit_mid_word(self):
+        self.set_text("ola")
+        self.key("i")
+        self.engine.handle_key("", "ó")
+        self.key("Escape")
+        self.assertEqual(self.engine.text, "óola")
+        self.assertEqual(self.cursor, (0, 1))
+
+    def test_im_commit_then_normal_keys(self):
+        # Flujo real: ´+a compone "á" (commit); la siguiente tecla es una
+        # letra normal que llega por key-pressed. No debe sustituirse la "á".
+        self.set_text("")
+        self.key("i")
+        self.engine.handle_key("", "á")
+        self.engine.handle_key("b", "b")
+        self.engine.handle_key("c", "c")
+        self.key("Escape")
+        self.assertEqual(self.engine.text, "ábc")
+        self.assertEqual(self.cursor, (0, 3))
+
+    def test_im_commit_replace_mode(self):
+        self.set_text("hola")
+        self.key("R")
+        self.engine.handle_key("", "é")
+        self.key("Escape")
+        self.assertEqual(self.engine.text, "éola")
+
+    def test_im_commit_in_search_prompt(self):
+        self.set_text("más y más")
+        self.key("/")
+        self.engine.handle_key("", "más")
+        self.engine.handle_key("Return", "")
+        self.assertEqual(self.engine.search_pattern, "más")
+
+    def test_im_commit_normal_mode_ignored(self):
+        self.set_text("hola")
+        self.engine.handle_key("", "á")
+        self.assertEqual(self.engine.text, "hola")
+
+
 if __name__ == "__main__":
     unittest.main()
