@@ -1225,14 +1225,25 @@ class VimEngine:
 
     def _insert_backspace(self):
         row, col = self.cursor
+        line = self.lines[row]
         if col == 0:
-            # Al inicio de una línea, Backspace no hace nada (no une con la
-            # línea anterior).
+            if line or row == 0:
+                # Al inicio de una línea no vacía (o de la primera), no hace
+                # nada.
+                return
+            # Si la línea está vacía, une con la anterior.
+            if not self._insert_pushed:
+                self._push_undo()
+                self._insert_pushed = True
+            prev_len = len(self.lines[row - 1])
+            self.lines[row - 1] = self.lines[row - 1] + self.lines[row]
+            del self.lines[row]
+            self.cursor = (row - 1, prev_len)
+            self._changed()
             return
         if not self._insert_pushed:
             self._push_undo()
             self._insert_pushed = True
-        line = self.lines[row]
         self.lines[row] = line[:col - 1] + line[col:]
         self.cursor = (row, col - 1)
         self._changed()
