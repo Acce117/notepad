@@ -8,7 +8,7 @@ Usa Gtk.Application, lo que aporta dos ventajas:
 
 El directorio de notas se elige en este orden:
   1. Variable de entorno NOTAS_DIR.
-  2. ~/Documentos/Notas.
+  2. ~/Documents/Notes (carpeta Documents del sistema).
 """
 
 import os

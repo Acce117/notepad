@@ -2,21 +2,36 @@
 """Almacenamiento de las notas en el sistema de archivos.
 
 Cada nota es un archivo `.md` plano dentro de un directorio configurable
-(p. ej. `~/Documentos/Notas`). La clase `Notes` es la única capa que toca
+(p. ej. `~/Documents/Notes`). La clase `Notes` es la única capa que toca
 el disco; la ventana y el motor Vim trabajan siempre a través de ella.
 """
 
 import os
 import re
+import subprocess
 from datetime import datetime
 
 
+def _documents_dir():
+    """Directorio 'Documents' del sistema, vía xdg-user-dir si está disponible."""
+    try:
+        out = subprocess.run(
+            ["xdg-user-dir", "DOCUMENTS"],
+            capture_output=True, text=True, timeout=2,
+        ).stdout.strip()
+        if out:
+            return out
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return os.path.join(os.path.expanduser("~"), "Documents")
+
+
 def default_notes_dir():
-    """Directorio por defecto: la variable NOTAS_DIR o ~/Documentos/Notas."""
+    """Directorio por defecto: la variable NOTAS_DIR o ~/Documents/Notes."""
     env = os.environ.get("NOTAS_DIR")
     if env:
         return os.path.expanduser(env)
-    return os.path.join(os.path.expanduser("~"), "Documentos", "Notas")
+    return os.path.join(_documents_dir(), "Notes")
 
 
 class Notes:

@@ -7,7 +7,7 @@ texto **estilo Vim** y soporte para **múltiples notas**.
 - **Editor**: motor Vim propio (modos normal / insertar / visual / comando,
   búsqueda, contadores, deshacer/rehacer).
 - **Almacenamiento**: cada nota es un archivo `.md` plano en
-  `~/Documentos/Notas` (configurable con `NOTAS_DIR`).
+  `~/Documents/Notes` (configurable con `NOTAS_DIR`).
 - **Acceso rápido**: comando `note` en la terminal y atajo global
   `Ctrl+Alt+N`. Instancia única: si ya está abierta, se trae al frente.
 
@@ -68,7 +68,8 @@ Para desinstalar:
 
 ## Directorio de notas
 
-Por defecto `~/Documentos/Notas`. Si prefieres otra ubicación:
+Por defecto `~/Documents/Notes` (carpeta Documents del sistema). Si prefieres
+otra ubicación:
 
 ```bash
 export NOTAS_DIR=~/mis-notas   # antes de lanzar `note`
